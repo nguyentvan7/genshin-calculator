@@ -9,24 +9,30 @@ import { CharacterBuild } from "./genshin/CharacterBuild";
 import { WeaponBuild } from "./genshin/WeaponBuild";
 
 const { Option } = Select;
-
-let char = new CharacterBuild();
-let wep = new WeaponBuild();
+//let char: CharacterBuild;
+//let setChar: React.Dispatch<React.SetStateAction<CharacterBuild>>;
+//let wep:WeaponBuild;
+//let setWep: React.Dispatch<React.SetStateAction<WeaponBuild>>;
 
 export interface BuildFormProps {
     desired: boolean;
+    char: CharacterBuild;
+    setChar: React.Dispatch<React.SetStateAction<CharacterBuild>>;
+    wep:WeaponBuild;
+    setWep: React.Dispatch<React.SetStateAction<WeaponBuild>>;
 }
+//export interface BuildFormProps {
+//    desired: boolean;
+//    char: CharacterBuild;
+//    test(a: CharacterBuild): void;
+//    test2: React.Dispatch<React.SetStateAction<CharacterBuild>>;
+//}
 
 function BuildForm(props: BuildFormProps): JSX.Element {
-    const [characterAscension, setCharacterAscension] = React.useState(0);
-    const [characterLevel, setCharacterLevel] = React.useState(1);
-    const [normalLevel, setNormalLevel] = React.useState(1);
-    const [skillLevel, setSkillLevel] = React.useState(1);
-    const [burstLevel, setBurstLevel] = React.useState(1);
-
-    const [weaponAscension, setWeaponAscension] = React.useState(0);
-    const [weaponLevel, setWeaponLevel] = React.useState(1);
-    const [weaponStars, setWeaponStars] = React.useState(4);
+    const char = props.char;
+    const setChar = props.setChar;
+    const wep = props.wep;
+    const setWep = props.setWep;
 
     // ===============================
     // CHARACTER
@@ -34,29 +40,27 @@ function BuildForm(props: BuildFormProps): JSX.Element {
     let characterAscensionOptions: CascaderOptionType[] = [];
     let talentLevelOptions: JSX.Element[] = [];
     const changeCharacterAscensionHandler = (values: CascaderValueType) => {
-        setCharacterAscension(values[0] as number);
-        setCharacterLevel(values[1] as number);
-        console.log(normalLevel + " " + CharacterAscensionSpecs[characterAscension].maximumTalentLevel + " " + characterAscension);
         const maxLevel = CharacterAscensionSpecs[values[0] as number].maximumTalentLevel;
-        setNormalLevel(Math.min(normalLevel, maxLevel));
-        setSkillLevel(Math.min(skillLevel, maxLevel));
-        setBurstLevel(Math.min(burstLevel, maxLevel));
+        char.normalTalentLevel = Math.min(char.normalTalentLevel, maxLevel);
+        char.skillTalentLevel = Math.min(char.skillTalentLevel, maxLevel);
+        char.burstTalentLevel = Math.min(char.burstTalentLevel, maxLevel);
         char.characterAscension = values[0] as number;
         char.characterLevel = values[1] as number;
+        setChar((char: CharacterBuild) => ({...char}));
     }
     const changeNormalLevelHandler = (value: SelectValue) => {
-        setNormalLevel(value?.valueOf() as number);
         char.normalTalentLevel = value?.valueOf() as number;
+        setChar((char: CharacterBuild) => ({...char}));
     }
     const changeSkillLevelHandler = (value: SelectValue) => {
-        setSkillLevel(value?.valueOf() as number);
         char.skillTalentLevel = value?.valueOf() as number;
+        setChar((char: CharacterBuild) => ({...char}));
     }
     const changeBurstLevelHandler = (value: SelectValue) => {
-        setBurstLevel(value?.valueOf() as number);
         char.burstTalentLevel = value?.valueOf() as number;
+        setChar((char: CharacterBuild) => ({...char}));
     }
-    const maxLevel = CharacterAscensionSpecs[characterAscension].maximumTalentLevel;
+    const maxLevel = CharacterAscensionSpecs[char.characterAscension].maximumTalentLevel;
     for (let level = 1; level <= maxLevel; level++) {
         talentLevelOptions.push(<Option value={level} key={level}>{level}</Option>);
     }
@@ -69,14 +73,13 @@ function BuildForm(props: BuildFormProps): JSX.Element {
     // ===============================
     let weaponAscensionOptions: CascaderOptionType[] = [];
     const changeWeaponAscensionHandler = (values: CascaderValueType) => {
-        setWeaponAscension(values[0] as number);
-        setWeaponLevel(values[1] as number);
         wep.weaponAscension = values[0] as number;
         wep.weaponLevel = values[1] as number;
+        setWep((wep: WeaponBuild) => ({...wep}));
     }
     const changeWeaponStarsHandler = (value: SelectValue) => {
-        setWeaponStars(value as number);
         wep.weaponStars = value as number;
+        setWep((wep: WeaponBuild) => ({...wep}));
     }
     CharacterAscensionSpecs.forEach(function (ca) {
         weaponAscensionOptions.push(BuildAscensionCascaderOption(ca.ascensionLevel, ca.minimumCharacterLevel, ca.maximumCharacterLevel));
@@ -88,23 +91,23 @@ function BuildForm(props: BuildFormProps): JSX.Element {
             <Form id={formType+"Form"}>
                 <h2>Input {formType} character build</h2>
                 <label>Character Ascension / Character Level: </label>
-                <Cascader options={characterAscensionOptions} onChange={changeCharacterAscensionHandler}></Cascader>
+                <Cascader allowClear={false} options={characterAscensionOptions} onChange={changeCharacterAscensionHandler}></Cascader>
                 <br></br>
                 <label>Normal Attack Talent Level: </label>
-                <Select value={normalLevel} onChange={changeNormalLevelHandler}>{talentLevelOptions}</Select>
+                <Select value={char.normalTalentLevel} onChange={changeNormalLevelHandler}>{talentLevelOptions}</Select>
                 <br></br>
                 <label>Elemental Skill Talent Level: </label>
-                <Select value={skillLevel} onChange={changeSkillLevelHandler}>{talentLevelOptions}</Select>
+                <Select value={char.skillTalentLevel} onChange={changeSkillLevelHandler}>{talentLevelOptions}</Select>
                 <br></br>
                 <label>Elemental Burst Talent Level: </label>
-                <Select value={burstLevel} onChange={changeBurstLevelHandler}>{talentLevelOptions}</Select>
+                <Select value={char.burstTalentLevel} onChange={changeBurstLevelHandler}>{talentLevelOptions}</Select>
 
                 <h2>Input {formType} weapon build</h2>
                 <label>Weapon Ascension / Weapon Level: </label>
-                <Cascader options={weaponAscensionOptions} onChange={changeWeaponAscensionHandler}></Cascader>
+                <Cascader allowClear={false} options={weaponAscensionOptions} onChange={changeWeaponAscensionHandler}></Cascader>
                 <br></br>
                 <label>Weapon Stars: </label>
-                <Select value={weaponStars} onChange={changeWeaponStarsHandler}>
+                <Select value={wep.weaponStars} onChange={changeWeaponStarsHandler}>
                     <Option value={3} key={3}>3</Option>
                     <Option value={4} key={4}>4</Option>
                     <Option value={5} key={5}>5</Option>

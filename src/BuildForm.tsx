@@ -2,8 +2,7 @@ import React, { ReactElement } from "react";
 import { CharacterAscensionSpecs } from "./genshin/CharacterAscensionSpec";
 import { CascaderValueType, CascaderOptionType } from 'antd/lib/cascader';
 import { Cascader, Form, Select } from "antd";
-import { SelectValue, OptionType } from 'antd/lib/select';
-import { OptionData } from "rc-select/lib/interface";
+import { SelectValue } from 'antd/lib/select';
 
 import { CharacterBuild } from "./genshin/CharacterBuild";
 import { WeaponBuild } from "./genshin/WeaponBuild";
@@ -28,7 +27,7 @@ export interface BuildFormProps {
 //    test2: React.Dispatch<React.SetStateAction<CharacterBuild>>;
 //}
 
-function BuildForm(props: BuildFormProps): JSX.Element {
+function BuildForm(props: BuildFormProps): ReactElement {
     const char = props.char;
     const setChar = props.setChar;
     const wep = props.wep;
@@ -108,7 +107,7 @@ function BuildForm(props: BuildFormProps): JSX.Element {
                 <br></br>
                 <label>Weapon Stars: </label>
                 <Select value={wep.weaponStars} onChange={changeWeaponStarsHandler}>
-                    <Option value={3} key={3}>3</Option>
+                    {/* <Option value={3} key={3}>3</Option> */}
                     <Option value={4} key={4}>4</Option>
                     <Option value={5} key={5}>5</Option>
                 </Select>

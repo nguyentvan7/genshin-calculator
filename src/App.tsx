@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import BuildForm from './BuildForm';
+import {DesiredTable, InventoryTable} from './MaterialTable';
 import { Divider } from 'antd';
 import { CharacterBuild } from './genshin/CharacterBuild';
 import { WeaponBuild } from './genshin/WeaponBuild';
@@ -20,6 +21,10 @@ function App() {
       <br></br>
       <BuildForm desired={false} char={currentChar} setChar={setCurrentChar} wep={currentWep} setWep={setCurrentWep}></BuildForm>
       <br></br>
+      <Divider></Divider>
+      <DesiredTable desiredChar={desiredChar} desiredWep={desiredWep}></DesiredTable>
+      <Divider></Divider>
+      <InventoryTable></InventoryTable>
       <br></br>
       {JSON.stringify(desiredChar)}
       {JSON.stringify(desiredWep)}

@@ -90,7 +90,7 @@ function BuildForm(props: BuildFormProps): ReactElement {
             <Form id={formType+"Form"}>
                 <h2>Input {formType} character build</h2>
                 <label>Character Ascension / Character Level: </label>
-                <Cascader allowClear={false} options={characterAscensionOptions} onChange={changeCharacterAscensionHandler}></Cascader>
+                <Cascader value={[char.characterAscension, char.characterLevel]} allowClear={false} options={characterAscensionOptions} onChange={changeCharacterAscensionHandler}></Cascader>
                 <br></br>
                 <label>Normal Attack Talent Level: </label>
                 <Select value={char.normalTalentLevel} onChange={changeNormalLevelHandler}>{talentLevelOptions}</Select>
@@ -103,7 +103,7 @@ function BuildForm(props: BuildFormProps): ReactElement {
 
                 <h2>Input {formType} weapon build</h2>
                 <label>Weapon Ascension / Weapon Level: </label>
-                <Cascader allowClear={false} options={weaponAscensionOptions} onChange={changeWeaponAscensionHandler}></Cascader>
+                <Cascader value={[wep.weaponAscension, wep.weaponLevel]} allowClear={false} options={weaponAscensionOptions} onChange={changeWeaponAscensionHandler}></Cascader>
                 <br></br>
                 <label>Weapon Stars: </label>
                 <Select value={wep.weaponStars} onChange={changeWeaponStarsHandler}>

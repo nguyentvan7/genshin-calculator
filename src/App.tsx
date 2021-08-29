@@ -1,13 +1,13 @@
 import React from 'react';
 import './App.css';
 import BuildForm from './BuildForm';
-import { DesiredTable, InventoryTable } from './MaterialTable';
+import { DesiredTable, generateBlankData, InventoryTable, MaterialTableData } from './MaterialTable';
 import { Divider } from 'antd';
 import { CharacterBuild } from './genshin/CharacterBuild';
 import { WeaponBuild } from './genshin/WeaponBuild';
 
 // Used to store and load state from localstorage.
-function useStoredState<Type>(defaultValue: Type, key: string) :[Type, React.Dispatch<React.SetStateAction<Type>>] {
+function useStoredState<Type>(defaultValue: Type, key: string): [Type, React.Dispatch<React.SetStateAction<Type>>] {
   const [state, setState] = React.useState<Type>(() => {
     const storedValue = window.localStorage.getItem(key);
     return storedValue !== null ? JSON.parse(storedValue) as Type : defaultValue;
@@ -26,6 +26,7 @@ function App() {
   const [desiredWep, setDesiredWep] = useStoredState<WeaponBuild>(new WeaponBuild(), "desiredWep");
   const [currentChar, setCurrentChar] = useStoredState<CharacterBuild>(new CharacterBuild(), "currentChar");
   const [currentWep, setCurrentWep] = useStoredState<WeaponBuild>(new WeaponBuild(), "currentWep");
+  const [currentInv, setCurrentInv] = useStoredState<MaterialTableData[]>(generateBlankData() as MaterialTableData[], "currentInv");
 
   return (
     <div className="App">
@@ -37,9 +38,10 @@ function App() {
       <BuildForm desired={false} char={currentChar} setChar={setCurrentChar} wep={currentWep} setWep={setCurrentWep}></BuildForm>
       <br></br>
       <Divider></Divider>
-      <DesiredTable desiredChar={desiredChar} desiredWep={desiredWep}></DesiredTable>
-      <Divider></Divider>
-      <InventoryTable></InventoryTable>
+      <div style={{ display: "flex", flexWrap: "wrap" }}>
+        <div style={{ margin: "10px", flex: '0 0 900px', width: "900px" }}><DesiredTable desiredChar={desiredChar} desiredWep={desiredWep}></DesiredTable></div>
+        <div style={{ margin: "10px", flex: '0 0 900px', width: "900px" }}><InventoryTable currentInv={currentInv} setCurrentInv={setCurrentInv}></InventoryTable></div>
+      </div>
       <br></br>
       {JSON.stringify(desiredChar)}
       {JSON.stringify(desiredWep)}

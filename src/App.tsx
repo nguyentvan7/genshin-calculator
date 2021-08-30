@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import BuildForm from './BuildForm';
-import { DesiredTable, generateBlankData, InventoryTable, MaterialTableData } from './MaterialTable';
+import { DesiredTable, generateBlankData, InventoryTable, MaterialTableData, ConverterTable } from './MaterialTable';
 import { Divider } from 'antd';
 import { CharacterBuild } from './genshin/CharacterBuild';
 import { WeaponBuild } from './genshin/WeaponBuild';
@@ -26,28 +26,27 @@ function App() {
   const [desiredWep, setDesiredWep] = useStoredState<WeaponBuild>(new WeaponBuild(), "desiredWep");
   const [currentChar, setCurrentChar] = useStoredState<CharacterBuild>(new CharacterBuild(), "currentChar");
   const [currentWep, setCurrentWep] = useStoredState<WeaponBuild>(new WeaponBuild(), "currentWep");
+  const [desiredInv, setDesiredInv] = React.useState<MaterialTableData[]>(generateBlankData());
   const [currentInv, setCurrentInv] = useStoredState<MaterialTableData[]>(generateBlankData() as MaterialTableData[], "currentInv");
 
   return (
     <div className="App">
       <h1>Genshin Character Resource Calculator</h1>
-      <BuildForm desired={true} char={desiredChar} setChar={setDesiredChar} wep={desiredWep} setWep={setDesiredWep}></BuildForm>
-      <br></br>
-      <Divider></Divider>
-      <br></br>
-      <BuildForm desired={false} char={currentChar} setChar={setCurrentChar} wep={currentWep} setWep={setCurrentWep}></BuildForm>
-      <br></br>
-      <Divider></Divider>
+      <BuildForm desired={true} char={desiredChar} setChar={setDesiredChar}
+        wep={desiredWep} setWep={setDesiredWep}
+        inventory={desiredInv} setInventory={setDesiredInv}
+      />
+      <br/>
+      <Divider/>
+      <br/>
+      <BuildForm desired={false} char={currentChar} setChar={setCurrentChar} wep={currentWep} setWep={setCurrentWep}/>
+      <br/>
+      <Divider/>
       <div style={{ display: "flex", flexWrap: "wrap" }}>
-        <div style={{ margin: "10px", flex: '0 0 900px', width: "900px" }}><DesiredTable desiredChar={desiredChar} desiredWep={desiredWep}></DesiredTable></div>
-        <div style={{ margin: "10px", flex: '0 0 900px', width: "900px" }}><InventoryTable currentInv={currentInv} setCurrentInv={setCurrentInv}></InventoryTable></div>
+        <div className="table-div"><DesiredTable desiredInv={desiredInv}/></div>
+        <div className="table-div"><InventoryTable currentInv={currentInv} setCurrentInv={setCurrentInv}/></div>
       </div>
-      <br></br>
-      {JSON.stringify(desiredChar)}
-      {JSON.stringify(desiredWep)}
-      <Divider></Divider>
-      {JSON.stringify(currentChar)}
-      {JSON.stringify(currentWep)}
+      <div className="table-div"><ConverterTable desiredInv={desiredInv} currentInv={currentInv}/></div>
     </div>
   );
 }

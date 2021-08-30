@@ -73,3 +73,13 @@
 .editable-input {
   margin: 0
 }
+
+.table-div {
+ margin: 10px;
+ flex: 0 0 900px;
+ width: 900px;
+}
+
+.ant-cascader-menu {
+  height: 232px;
+}

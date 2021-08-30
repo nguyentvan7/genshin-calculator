@@ -3,14 +3,14 @@ import React, { ReactElement, useContext, useEffect, useRef } from "react";
 import { CharacterBuild } from "./genshin/CharacterBuild";
 import { WeaponBuild } from "./genshin/WeaponBuild";
 import MaterialData from "./Data.json";
+import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 
 type MaterialDataKey = keyof typeof MaterialData;
 type CharacterBuildKey = keyof CharacterBuild;
 type WeaponBuildKey = keyof WeaponBuild;
 
 export interface DesiredTableProps {
-    desiredChar: CharacterBuild;
-    desiredWep: WeaponBuild;
+    desiredInv: MaterialTableData[];
 }
 
 export interface InventoryTableProps {
@@ -18,10 +18,15 @@ export interface InventoryTableProps {
     setCurrentInv: React.Dispatch<React.SetStateAction<MaterialTableData[]>>;
 }
 
+export interface ConverterTableProps {
+    currentInv: MaterialTableData[];
+    desiredInv: MaterialTableData[];
+}
+
 export interface MaterialTableData {
     key?: number;
-    material: string;
-    tier1: number;
+    material: number;
+    tier1?: number;
     tier2?: number;
     tier3?: number;
     tier4?: number;
@@ -43,17 +48,36 @@ enum Material {
     Mora
 }
 
+const MaterialTierMap = new Map<number, number>([
+    [Material.Gem, 4],
+    [Material.Boss, 1],
+    [Material.EXPBook, 3],
+    [Material.Local, 1],
+    [Material.CommonChar, 3],
+    [Material.TalentBook, 3],
+    [Material.Weekly, 1],
+    [Material.Crown, 1],
+    [Material.Ore, 3],
+    [Material.Weapon, 4],
+    [Material.CommonWep1, 3],
+    [Material.CommonWep2, 3],
+    [Material.Mora, 1],
+]);
+
 const columns = [
     {
         title: "Material",
         dataIndex: "material",
         key: "material",
+        width: "36%",
+        render: (value:any) => Material[value]
         //todo: change render option to adjust based on if what is in the inventory is enough to cover what is needed.
     },
     {
         title: "Tier 1",
         dataIndex: "tier1",
         key: "tier 1",
+        width: "16%",
         editable: true,
         render: (value:any) => value ? value.toLocaleString(): ""
     },
@@ -61,91 +85,75 @@ const columns = [
         title: "Tier 2",
         dataIndex: "tier2",
         key: "tier 2",
+        width: "16%",
         editable: true,
+        render: (value:any) => value ? value.toLocaleString(): ""
     },
     {
         title: "Tier 3",
         dataIndex: "tier3",
         key: "tier 3",
+        width: "16%",
         editable: true,
+        render: (value:any) => value ? value.toLocaleString(): ""
     },
     {
         title: "Tier 4",
         dataIndex: "tier4",
         key: "tier 4",
+        width: "16%",
         editable: true,
+        render: (value:any) => value ? value.toLocaleString(): ""
     },
 ]
 
 export function generateBlankData(): MaterialTableData[] {
     return Object.keys(Material).filter(key => !isNaN(Number(key))).map(val => {
-        return { key: Number(val), material: Material[Number(val)], tier1: 0 }
+        return { key: Number(val), material: Number(val), tier1: 0}
     });
 }
 
+// ===============================
+// VIEWONLY TABLES
+// ===============================
+
 function DesiredTable(props: DesiredTableProps): ReactElement {
-    let data: MaterialTableData[] = generateBlankData();
-
-    // Iterate over each character property.
-    const charKeys: CharacterBuildKey[] = Object.keys(props.desiredChar) as CharacterBuildKey[];
-    for (let index in charKeys) {
-        let matKey: MaterialDataKey;
-        if (charKeys[index].includes("TalentLevel")) matKey = "talentLevel" as MaterialDataKey;
-        else matKey = charKeys[index] as MaterialDataKey;
-        let desiredLevel = props.desiredChar[charKeys[index]];
-        let levelData = MaterialData[matKey];
-        type key = keyof typeof levelData;
-        // Iterate over each level.
-        for (let level in levelData) {
-            if (Number(level) > desiredLevel) break;
-            // Iterate over each material.
-            const mats: MaterialTableData[] = levelData[level as key];
-            mats.forEach(mat => {
-                if (mat.tier1) data[Number(mat.material)].tier1 += mat.tier1;
-                if (!data[Number(mat.material)].tier2 && mat.tier2) data[Number(mat.material)].tier2 = 0;
-                if (mat.tier2) data[Number(mat.material)].tier2! += mat.tier2;
-                if (!data[Number(mat.material)].tier3 && mat.tier3) data[Number(mat.material)].tier3 = 0;
-                if (mat.tier3) data[Number(mat.material)].tier3! += mat.tier3;
-                if (!data[Number(mat.material)].tier4 && mat.tier4) data[Number(mat.material)].tier4 = 0;
-                if (mat.tier4) data[Number(mat.material)].tier4! += mat.tier4;
-            });
-        }
-    }
-
-    // TODO: modularize this with above.
-    // Iterate over each weapon property.
-    const wepKeys: WeaponBuildKey[] = Object.keys(props.desiredWep) as WeaponBuildKey[];
-    for (let index in wepKeys) {
-        let matKey: MaterialDataKey;
-        if (wepKeys[index] === "weaponStars") continue;
-        matKey = wepKeys[index] + props.desiredWep.weaponStars as MaterialDataKey;
-        let desiredLevel = props.desiredWep[wepKeys[index]];
-        let levelData = MaterialData[matKey];
-        type key = keyof typeof levelData;
-        // Iterate over each level.
-        for (let level in levelData) {
-            if (Number(level) > desiredLevel) break;
-            // Iterate over each material.
-            const mats: MaterialTableData[] = levelData[level as key];
-            mats.forEach(mat => {
-                if (mat.tier1) data[Number(mat.material)].tier1 += mat.tier1;
-                if (!data[Number(mat.material)].tier2 && mat.tier2) data[Number(mat.material)].tier2 = 0;
-                if (mat.tier2) data[Number(mat.material)].tier2! += mat.tier2;
-                if (!data[Number(mat.material)].tier3 && mat.tier3) data[Number(mat.material)].tier3 = 0;
-                if (mat.tier3) data[Number(mat.material)].tier3! += mat.tier3;
-                if (!data[Number(mat.material)].tier4 && mat.tier4) data[Number(mat.material)].tier4 = 0;
-                if (mat.tier4) data[Number(mat.material)].tier4! += mat.tier4;
-            });
-        }
-    }
-
+    let data: MaterialTableData[] = props.desiredInv;
     return (
         <div>
-            <Table columns={columns} dataSource={data} pagination={false}></Table>
+            <Table columns={columns} dataSource={data} pagination={false}/>
         </div>
     );
 }
 
+function ConverterTable(props: ConverterTableProps): ReactElement {
+    let data: MaterialTableData[] = generateBlankData();
+    
+    // Iterate over each material.
+    props.currentInv.forEach(material => {
+        let convertToTier2 = 3;
+        let convertToTier3 = 3;
+        let tiers = MaterialTierMap.get(material.material);
+        if (material.material === Material.EXPBook) {
+            convertToTier2 = 5;
+            convertToTier3 = 4;
+        }
+        else if (material.material === Material.Ore) {
+            convertToTier2 = 5;
+            convertToTier3 = 5;
+        }
+    });
+
+    return (
+        <div>
+            <Table columns={columns} dataSource={data} pagination={false}/>
+        </div>
+    );
+}
+
+// ===============================
+// EDITABLE TABLE
+// ===============================
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
 interface EditableRowProps {
@@ -226,7 +234,7 @@ function InventoryTable(props: InventoryTableProps): ReactElement {
             ...material,
             ...row
         });
-        props.setCurrentInv(newInv);
+        props.setCurrentInv!(newInv);
     };
 
     const editableComponents = {
@@ -254,9 +262,9 @@ function InventoryTable(props: InventoryTableProps): ReactElement {
 
     return (
         <div>
-            <Table components={editableComponents} columns={editableColumns} dataSource={props.currentInv} pagination={false}></Table>
+            <Table components={editableComponents} columns={editableColumns} dataSource={props.currentInv} pagination={false}/>
         </div>
     );
 }
 
-export { DesiredTable, InventoryTable };
+export { DesiredTable, InventoryTable, ConverterTable };
